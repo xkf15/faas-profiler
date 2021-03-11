@@ -48,6 +48,8 @@ base_gust_url = APIHOST + '/api/v1/web/guest/default/'
 param_file_cache = {}   # a cache to keep json of param files
 binary_data_cache = {}  # a cache to keep binary data (image files, etc.)
 
+action_times = {} # a cache of invocation times of functions
+
 
 def PROCESSInstanceGenerator(instance, instance_script, instance_times, blocking_cli):
     if len(instance_times) == 0:
@@ -80,12 +82,27 @@ def HTTPInstanceGenerator(action, instance_times, blocking_cli, param_file=None)
     if param_file == None:
         st = 0
         for t in instance_times:
+            # Mark invocation number for each invokation
+            if action in action_times:
+                action_times[action] = action_times[action] + 1
+            else:
+                action_times[action] = 0
+            invoke_number = str(action_times[action])
+
+            # Initialize before_time at the first invocation
+            if before_time == 0 :
+                before_time = time.time()
+            after_time = time.time()
+            # Calculate the time need to wait
             st = st + t - (after_time - before_time)
             before_time = time.time()
             if st > 0:
                 time.sleep(st)
+
+            logger.info('start,' + action + ',' + invoke_number);
             future = session.post(url, params=parameters, auth=authentication, verify=False)
-            after_time = time.time()
+            logger.info('end,' + action + ',' + invoke_number);
+
     else:   # if a parameter file is provided
         try:
             param_file_body = param_file_cache[param_file]
@@ -93,15 +110,29 @@ def HTTPInstanceGenerator(action, instance_times, blocking_cli, param_file=None)
             with open(param_file, 'r') as f:
                 param_file_body = json.load(f)
                 param_file_cache[param_file] = param_file_body
-
+        st = 0
         for t in instance_times:
-            st = t - (after_time - before_time)
+            # Mark invocation number for each invokation
+            if action in action_times:
+                action_times[action] = action_times[action] + 1
+            else:
+                action_times[action] = 0
+            invoke_number = str(action_times[action])
+
+            # Initialize before_time at the first invocation
+            if before_time == 0 :
+                before_time = time.time()
+            after_time = time.time()
+            # Calculate the time need to wait
+            st = st + t - (after_time - before_time)
+            before_time = time.time()
             if st > 0:
                 time.sleep(st)
-            before_time = time.time()
+
+            logger.info('start,' + action + ',' + invoke_number);
             future = session.post(url, params=parameters, auth=authentication,
                                   json=param_file_body, verify=False)
-            after_time = time.time()
+            logger.info('end,' + action + ',' + invoke_number);
 
     return True
 
@@ -122,15 +153,30 @@ def BinaryDataHTTPInstanceGenerator(action, instance_times, blocking_cli, data_f
         data = open(data_file, 'rb').read()
         binary_data_cache[data_file] = data
 
+    st = 0
     for t in instance_times:
-        st = t - (after_time - before_time)
+        # Mark invocation number for each invokation
+        if action in action_times:
+            action_times[action] = action_times[action] + 1
+        else:
+            action_times[action] = 0
+        invoke_number = str(action_times[action])
+
+        # Initialize before_time at the first invocation
+        if before_time == 0 :
+            before_time = time.time()
+        after_time = time.time()
+        # Calculate the time need to wait
+        st = st + t - (after_time - before_time)
+        before_time = time.time()
         if st > 0:
             time.sleep(st)
-        before_time = time.time()
+
+        logger.info('start,' + action + ',' + invoke_number);
         session.post(url=url, headers={'Content-Type': 'image/jpeg'},
                      params={'blocking': blocking_cli, 'result': RESULT},
                      data=data, auth=(user_pass[0], user_pass[1]), verify=False)
-        after_time = time.time()
+        logger.info('end,' + action + ',' + invoke_number);
 
     return True
 
@@ -140,7 +186,7 @@ def main(argv):
     The main function.
     """
     logger.info("Workload Invoker started")
-    print("Log file -> logs/SWI.log")
+    # print("Log file -> logs/SWI.log")
     parser = OptionParser()
     parser.add_option("-c", "--config_json", dest="config_json",
                       help="The input json config file describing the synthetic workload.", metavar="FILE")
