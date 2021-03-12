@@ -57,7 +57,7 @@ def constructFunctionStatusCommand(val):
     str3 = str((val >> 12) & 0xff);
     # func_invoke_trace = "printf '\x00\x00\x00\x00' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
     # func_respond_trace = "printf '\x00\x00\x00\x03' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
-    return "printf '\x" + str3 + "\x" + str2 + "\x" + str1 + "\x" + str0 + "' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
+    return r"printf '\x" + str3 + r"\x" + str2 + r"\x" + str1 + r"\x" + str0 + r"' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
 
 def PROCESSInstanceGenerator(instance, instance_script, instance_times, blocking_cli):
     if len(instance_times) == 0:
@@ -168,7 +168,6 @@ def BinaryDataHTTPInstanceGenerator(action, action_id, instance_times, blocking_
             action_times[action] = action_times[action] + 1
         else:
             action_times[action] = 0
-        invoke_number = str(action_times[action])
 
         # Initialize before_time at the first invocation
         if before_time == 0 :
