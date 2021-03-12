@@ -108,7 +108,7 @@ def HTTPInstanceGenerator(action, action_id, instance_times, blocking_cli, param
 
             # logger.info('start,' + action + ',' + invoke_number);
             # os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
-            subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8))
+            subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8)])
             future = session.post(url, params=parameters, auth=authentication, verify=False)
             # logger.info('end,' + action + ',' + invoke_number);
 
@@ -139,7 +139,7 @@ def HTTPInstanceGenerator(action, action_id, instance_times, blocking_cli, param
 
             # logger.info('start,' + action + ',' + invoke_number);
             # os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
-            subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8))
+            subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8)])
             future = session.post(url, params=parameters, auth=authentication,
                                   json=param_file_body, verify=False)
             # logger.info('end,' + action + ',' + invoke_number);
@@ -183,7 +183,7 @@ def BinaryDataHTTPInstanceGenerator(action, action_id, instance_times, blocking_
 
         # logger.info('start,' + action + ',' + invoke_number);
         # os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
-        subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8))
+        subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8)])
         session.post(url=url, headers={'Content-Type': 'image/jpeg'},
                      params={'blocking': blocking_cli, 'result': RESULT},
                      data=data, auth=(user_pass[0], user_pass[1]), verify=False)
@@ -258,7 +258,7 @@ def main(argv):
     logger.info("Test started")
     # enable/disable tracing
     en_trace = r"printf '\xF0\xF0\xF0\xF0' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=20"
-    subprocess.run(['bash','-c',en_trace)
+    subprocess.run(['bash','-c',en_trace])
     for thread in threads:
         thread.start()
     logger.info("Test ended")
