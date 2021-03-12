@@ -52,12 +52,12 @@ action_times = {} # a cache of invocation times of functions
 
 def constructFunctionStatusCommand(val):
     str0 = str(val & 0xff);
-    str1 = str((val >> 4) & 0xff);
-    str2 = str((val >> 8) & 0xff);
-    str3 = str((val >> 12) & 0xff);
+    str1 = str((val >> 8) & 0xff);
+    str2 = str((val >> 16) & 0xff);
+    str3 = str((val >> 24) & 0xff);
     # func_invoke_trace = "printf '\x00\x00\x00\x00' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
     # func_respond_trace = "printf '\x00\x00\x00\x03' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
-    return r"printf '\x" + str3 + r"\x" + str2 + r"\x" + str1 + r"\x" + str0 + r"' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
+    return r"printf '\x" + str0 + r"\x" + str1 + r"\x" + str2 + r"\x" + str3 + r"' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
 
 def PROCESSInstanceGenerator(instance, instance_script, instance_times, blocking_cli):
     if len(instance_times) == 0:
@@ -107,7 +107,8 @@ def HTTPInstanceGenerator(action, action_id, instance_times, blocking_cli, param
                 time.sleep(st)
 
             # logger.info('start,' + action + ',' + invoke_number);
-            os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
+            # os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
+            subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8))
             future = session.post(url, params=parameters, auth=authentication, verify=False)
             # logger.info('end,' + action + ',' + invoke_number);
 
@@ -137,7 +138,8 @@ def HTTPInstanceGenerator(action, action_id, instance_times, blocking_cli, param
                 time.sleep(st)
 
             # logger.info('start,' + action + ',' + invoke_number);
-            os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
+            # os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
+            subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8))
             future = session.post(url, params=parameters, auth=authentication,
                                   json=param_file_body, verify=False)
             # logger.info('end,' + action + ',' + invoke_number);
@@ -180,7 +182,8 @@ def BinaryDataHTTPInstanceGenerator(action, action_id, instance_times, blocking_
             time.sleep(st)
 
         # logger.info('start,' + action + ',' + invoke_number);
-        os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
+        # os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
+        subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8))
         session.post(url=url, headers={'Content-Type': 'image/jpeg'},
                      params={'blocking': blocking_cli, 'result': RESULT},
                      data=data, auth=(user_pass[0], user_pass[1]), verify=False)
