@@ -257,8 +257,8 @@ def main(argv):
 
     logger.info("Test started")
     # enable/disable tracing
-    en_trace = "printf '\xF0\xF0\xF0\xF0' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=20"
-    os.system(en_trace)
+    en_trace = r"printf '\xF0\xF0\xF0\xF0' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=20"
+    subprocess.run(['bash','-c',en_trace)
     for thread in threads:
         thread.start()
     logger.info("Test ended")
