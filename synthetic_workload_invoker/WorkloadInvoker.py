@@ -107,8 +107,7 @@ def HTTPInstanceGenerator(action, action_id, instance_times, blocking_cli, param
 
             # logger.info('start,' + action + ',' + invoke_number);
             # os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
-            print(action_id, action_times[action])
-            subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8)])
+            subprocess.run(['bash','-c',constructFunctionStatusCommand(int((action_id << 24) + (action_times[action] << 8)))])
             future = session.post(url, params=parameters, auth=authentication, verify=False)
             # logger.info('end,' + action + ',' + invoke_number);
 
@@ -139,7 +138,7 @@ def HTTPInstanceGenerator(action, action_id, instance_times, blocking_cli, param
 
             # logger.info('start,' + action + ',' + invoke_number);
             # os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
-            subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8)])
+            subprocess.run(['bash','-c',constructFunctionStatusCommand(int((action_id << 24) + (action_times[action] << 8)))])
             future = session.post(url, params=parameters, auth=authentication,
                                   json=param_file_body, verify=False)
             # logger.info('end,' + action + ',' + invoke_number);
