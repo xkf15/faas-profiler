@@ -50,6 +50,17 @@ binary_data_cache = {}  # a cache to keep binary data (image files, etc.)
 
 action_times = {} # a cache of invocation times of functions
 
+# enable/disable tracing
+en_trace = "printf '\xF0\xF0\xF0\xF0' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=20"
+
+def constructFunctionStatusCommand(val):
+    str0 = str(val & 0xff);
+    str1 = str((val >> 4) & 0xff);
+    str2 = str((val >> 8) & 0xff);
+    str3 = str((val >> 12) & 0xff);
+    # func_invoke_trace = "printf '\x00\x00\x00\x00' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
+    # func_respond_trace = "printf '\x00\x00\x00\x03' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
+    return "printf '\x" + str3 + "\x" + str2 + "\x" + str1 + "\x" + str0 + "' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
 
 def PROCESSInstanceGenerator(instance, instance_script, instance_times, blocking_cli):
     if len(instance_times) == 0:
@@ -70,7 +81,7 @@ def PROCESSInstanceGenerator(instance, instance_script, instance_times, blocking
     return True
 
 
-def HTTPInstanceGenerator(action, instance_times, blocking_cli, param_file=None):
+def HTTPInstanceGenerator(action, action_id, instance_times, blocking_cli, param_file=None):
     if len(instance_times) == 0:
         return False
     session = FuturesSession(max_workers=15)
@@ -87,7 +98,6 @@ def HTTPInstanceGenerator(action, instance_times, blocking_cli, param_file=None)
                 action_times[action] = action_times[action] + 1
             else:
                 action_times[action] = 0
-            invoke_number = str(action_times[action])
 
             # Initialize before_time at the first invocation
             if before_time == 0 :
@@ -99,9 +109,10 @@ def HTTPInstanceGenerator(action, instance_times, blocking_cli, param_file=None)
             if st > 0:
                 time.sleep(st)
 
-            logger.info('start,' + action + ',' + invoke_number);
+            # logger.info('start,' + action + ',' + invoke_number);
+            os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
             future = session.post(url, params=parameters, auth=authentication, verify=False)
-            logger.info('end,' + action + ',' + invoke_number);
+            # logger.info('end,' + action + ',' + invoke_number);
 
     else:   # if a parameter file is provided
         try:
@@ -117,7 +128,6 @@ def HTTPInstanceGenerator(action, instance_times, blocking_cli, param_file=None)
                 action_times[action] = action_times[action] + 1
             else:
                 action_times[action] = 0
-            invoke_number = str(action_times[action])
 
             # Initialize before_time at the first invocation
             if before_time == 0 :
@@ -129,15 +139,16 @@ def HTTPInstanceGenerator(action, instance_times, blocking_cli, param_file=None)
             if st > 0:
                 time.sleep(st)
 
-            logger.info('start,' + action + ',' + invoke_number);
+            # logger.info('start,' + action + ',' + invoke_number);
+            os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
             future = session.post(url, params=parameters, auth=authentication,
                                   json=param_file_body, verify=False)
-            logger.info('end,' + action + ',' + invoke_number);
+            # logger.info('end,' + action + ',' + invoke_number);
 
     return True
 
 
-def BinaryDataHTTPInstanceGenerator(action, instance_times, blocking_cli, data_file):
+def BinaryDataHTTPInstanceGenerator(action, action_id, instance_times, blocking_cli, data_file):
     """
     TODO: Automate content type
     """
@@ -172,11 +183,12 @@ def BinaryDataHTTPInstanceGenerator(action, instance_times, blocking_cli, data_f
         if st > 0:
             time.sleep(st)
 
-        logger.info('start,' + action + ',' + invoke_number);
+        # logger.info('start,' + action + ',' + invoke_number);
+        os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
         session.post(url=url, headers={'Content-Type': 'image/jpeg'},
                      params={'blocking': blocking_cli, 'result': RESULT},
                      data=data, auth=(user_pass[0], user_pass[1]), verify=False)
-        logger.info('end,' + action + ',' + invoke_number);
+        # logger.info('end,' + action + ',' + invoke_number);
 
     return True
 
@@ -204,6 +216,7 @@ def main(argv):
 
     threads = []
 
+    action_id = 0
     for (instance, instance_times) in all_events.items():
         # Previous method to run processes
         # instance_script = 'bash ' + FAAS_ROOT + '/invocation-scripts/' + \
@@ -219,10 +232,11 @@ def main(argv):
         if 'data_file' in workload['instances'][instance].keys():
             data_file = workload['instances'][instance]['data_file']
             threads.append(threading.Thread(target=BinaryDataHTTPInstanceGenerator, args=[
-                           action, instance_times, blocking_cli, data_file]))
+                           action, action_id, instance_times, blocking_cli, data_file]))
         else:
             threads.append(threading.Thread(target=HTTPInstanceGenerator, args=[
-                           action, instance_times, blocking_cli, param_file]))
+                           action, action_id, instance_times, blocking_cli, param_file]))
+        action_id = action_id + 1
         pass
 
     # Dump Test Metadata
@@ -243,9 +257,11 @@ def main(argv):
         pass
 
     logger.info("Test started")
+    os.system(en_trace)
     for thread in threads:
         thread.start()
     logger.info("Test ended")
+    print(end!!)
 
     return True
 
