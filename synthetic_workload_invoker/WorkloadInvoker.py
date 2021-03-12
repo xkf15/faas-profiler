@@ -55,7 +55,7 @@ def constructFunctionStatusCommand(val):
     byte1 = (val >> 8) & 0xff;
     byte2 = (val >> 16) & 0xff;
     byte3 = (val >> 24) & 0xff;
-    return "printf '\\x%0.2x\\x%0.2x\\x%0.2x\\x%0,2x' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21" % (byte0, byte1, byte2, byte3)
+    return "printf '\\x%0.2x\\x%0.2x\\x%0.2x\\x%0.2x' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21" % (byte0, byte1, byte2, byte3)
     #return r"printf '\x" + str0 + r"\x" + str1 + r"\x" + str2 + r"\x" + str3 + r"' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
 
 def PROCESSInstanceGenerator(instance, instance_script, instance_times, blocking_cli):
