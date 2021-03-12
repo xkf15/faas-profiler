@@ -50,9 +50,6 @@ binary_data_cache = {}  # a cache to keep binary data (image files, etc.)
 
 action_times = {} # a cache of invocation times of functions
 
-# enable/disable tracing
-en_trace = "printf '\xF0\xF0\xF0\xF0' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=20"
-
 def constructFunctionStatusCommand(val):
     str0 = str(val & 0xff);
     str1 = str((val >> 4) & 0xff);
@@ -257,11 +254,12 @@ def main(argv):
         pass
 
     logger.info("Test started")
+    # enable/disable tracing
+    en_trace = "printf '\xF0\xF0\xF0\xF0' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=20"
     os.system(en_trace)
     for thread in threads:
         thread.start()
     logger.info("Test ended")
-    print(end!!)
 
     return True
 
