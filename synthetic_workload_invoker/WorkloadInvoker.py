@@ -51,13 +51,12 @@ binary_data_cache = {}  # a cache to keep binary data (image files, etc.)
 action_times = {} # a cache of invocation times of functions
 
 def constructFunctionStatusCommand(val):
-    str0 = str(val & 0xff);
-    str1 = str((val >> 8) & 0xff);
-    str2 = str((val >> 16) & 0xff);
-    str3 = str((val >> 24) & 0xff);
-    # func_invoke_trace = "printf '\x00\x00\x00\x00' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
-    # func_respond_trace = "printf '\x00\x00\x00\x03' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
-    return r"printf '\x" + str0 + r"\x" + str1 + r"\x" + str2 + r"\x" + str3 + r"' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
+    byte0 = val & 0xff;
+    byte1 = (val >> 8) & 0xff;
+    byte2 = (val >> 16) & 0xff;
+    byte3 = (val >> 24) & 0xff;
+    return "printf '\\x%0.2x\\x%0.2x\\x%0.2x\\x%0,2x' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21" % (byte0, byte1, byte2, byte3)
+    #return r"printf '\x" + str0 + r"\x" + str1 + r"\x" + str2 + r"\x" + str3 + r"' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"
 
 def PROCESSInstanceGenerator(instance, instance_script, instance_times, blocking_cli):
     if len(instance_times) == 0:
@@ -108,6 +107,7 @@ def HTTPInstanceGenerator(action, action_id, instance_times, blocking_cli, param
 
             # logger.info('start,' + action + ',' + invoke_number);
             # os.system(constructFunctionStatusCommand(action_id << 12 + action_times[action] << 4))
+            print(action_id, action_times[action])
             subprocess.run(['bash','-c',constructFunctionStatusCommand(action_id << 24 + action_times[action] << 8)])
             future = session.post(url, params=parameters, auth=authentication, verify=False)
             # logger.info('end,' + action + ',' + invoke_number);
