@@ -5,8 +5,10 @@
 # LICENSE file in the root directory of this source tree.
 
 import base64
+import subprocess
 
 def main(params):
+    subprocess.run(["bash","-c",r"printf '\x00\x00\x00\x01' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"])
     STR_SIZE = 1000000
     TRIES = 100
     str1 = b"a" * STR_SIZE
@@ -22,4 +24,5 @@ def main(params):
 
     result = {'s_encode' : str(s_encode), 's_decode' : str(s_decode)}
     
+    subprocess.run(["bash","-c",r"printf '\x00\x00\x00\x02' | sudo dd bs=8 status=none of=/dev/pqii_pci count=1 seek=21"])
     return result
